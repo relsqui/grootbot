@@ -1,5 +1,6 @@
 import logging
 import random
+import re
 
 from kitnirc.client import Channel
 from kitnirc.modular import Module
@@ -16,9 +17,14 @@ class GrootModule(Module):
     @Module.handle("PRIVMSG")
     def respond(self, client, actor, recipient, message):
         if isinstance(recipient, Channel):
-            if not ("groot" in message.lower() or message.lower().startswith("bot rave")):
+            if not ("groot" in message.lower() or
+                    message.lower().startswith("bot rave")):
                 return
-        reply = self.choose_reply(recipient)
+        if re.match("^({}[:,] *)?source[.?!]*$".format(self.controller.client.user.nick),
+                    message.lower(), re.I):
+            reply = "I am http://bit.ly/grootbot"
+        else:
+            reply = self.choose_reply(recipient)
         _log.info("{}: <{}> {}".format(recipient, actor.split("!")[0], message))
         _log.info("{}: <{}> {}".format(recipient, client.user.nick, reply))
         client.reply(recipient, actor, reply)
